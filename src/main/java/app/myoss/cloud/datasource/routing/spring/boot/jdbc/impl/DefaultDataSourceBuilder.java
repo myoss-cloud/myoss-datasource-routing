@@ -1,0 +1,233 @@
+/*
+ * Copyright 2018-2019 https://github.com/myoss
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+package app.myoss.cloud.datasource.routing.spring.boot.jdbc.impl;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.sql.DataSource;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.source.ConfigurationPropertyName;
+import org.springframework.boot.context.properties.source.ConfigurationPropertyNameAliases;
+import org.springframework.boot.context.properties.source.ConfigurationPropertySource;
+import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
+import org.springframework.boot.jdbc.DatabaseDriver;
+import org.springframework.util.ClassUtils;
+
+import app.myoss.cloud.datasource.routing.spring.boot.jdbc.DataSourceBuilder;
+
+/**
+ * Convenience class for building a {@link DataSource} with common
+ * implementations and properties. If HikariCP, Druid, Tomcat or Commons DBCP
+ * are on the classpath one of them will be selected (in that order with Hikari
+ * first). In the interest of a uniform interface, and so that there can be a
+ * fallback to an embedded database if one can be detected on the classpath,
+ * only a small set of common configuration properties are supported. To inject
+ * additional properties into the result you can downcast it, or use
+ * {@code @ConfigurationProperties}.
+ *
+ * @param <T> type of DataSource produced by the builder
+ * @author Dave Syer
+ * @author Madhura Bhave
+ * @author Jerry.Chen
+ * @since 2.0.0
+ * @since 2019年5月6日 下午10:55:20
+ * @see org.springframework.boot.jdbc.DataSourceBuilder
+ */
+public final class DefaultDataSourceBuilder<T extends DataSource> implements DataSourceBuilder {
+    private static final String[]       DATA_SOURCE_TYPE_NAMES = new String[] { "com.zaxxer.hikari.HikariDataSource",
+            "com.alibaba.druid.pool.DruidDataSource", "org.apache.tomcat.jdbc.pool.DataSource",
+            "org.apache.commons.dbcp2.BasicDataSource" };
+
+    private Class<? extends DataSource> type;
+
+    private ClassLoader                 classLoader;
+
+    private Map<String, Object>         properties;
+
+    /**
+     * create {@link DefaultDataSourceBuilder}
+     *
+     * @return {@link DefaultDataSourceBuilder}
+     */
+    public static DefaultDataSourceBuilder<?> create() {
+        return new DefaultDataSourceBuilder<>(new HashMap<>(8), null);
+    }
+
+    /**
+     * create {@link DefaultDataSourceBuilder}
+     *
+     * @param properties DataSource properties
+     * @return {@link DefaultDataSourceBuilder}
+     */
+    public static DefaultDataSourceBuilder<?> create(Map<String, Object> properties) {
+        return new DefaultDataSourceBuilder<>(properties, null);
+    }
+
+    /**
+     * create {@link DefaultDataSourceBuilder}
+     *
+     * @param classLoader classLoader
+     * @return {@link DefaultDataSourceBuilder}
+     */
+    public static DefaultDataSourceBuilder<?> create(ClassLoader classLoader) {
+        return new DefaultDataSourceBuilder<>(new HashMap<>(8), classLoader);
+    }
+
+    /**
+     * create {@link DefaultDataSourceBuilder}
+     *
+     * @param classLoader classLoader
+     * @param properties DataSource properties
+     * @return {@link DefaultDataSourceBuilder}
+     */
+    public static DefaultDataSourceBuilder<?> create(Map<String, Object> properties, ClassLoader classLoader) {
+        return new DefaultDataSourceBuilder<>(properties, classLoader);
+    }
+
+    private DefaultDataSourceBuilder(Map<String, Object> properties, ClassLoader classLoader) {
+        this.properties = properties;
+        this.classLoader = classLoader;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public T build() {
+        Class<? extends DataSource> type = getType();
+        DataSource result = BeanUtils.instantiateClass(type);
+        maybeGetDriverClassName();
+        bind(result);
+        return (T) result;
+    }
+
+    private void maybeGetDriverClassName() {
+        if (!this.properties.containsKey("driverClassName") && this.properties.containsKey("url")) {
+            String url = (String) this.properties.get("url");
+            String driverClass = DatabaseDriver.fromJdbcUrl(url).getDriverClassName();
+            this.properties.put("driverClassName", driverClass);
+        }
+    }
+
+    private void bind(DataSource result) {
+        ConfigurationPropertySource source = new MapConfigurationPropertySource(this.properties);
+        ConfigurationPropertyNameAliases aliases = new ConfigurationPropertyNameAliases();
+        aliases.addAliases("url", "jdbc-url");
+        aliases.addAliases("username", "user");
+        aliases.addAliases("name", "pool-name");
+        Binder binder = new Binder(source.withAliases(aliases));
+        binder.bind(ConfigurationPropertyName.EMPTY, Bindable.ofInstance(result));
+    }
+
+    /**
+     * set DataSource class type
+     *
+     * @param type DataSource class type
+     * @param <D> class type
+     * @return this instance
+     */
+    @SuppressWarnings("unchecked")
+    public <D extends DataSource> DefaultDataSourceBuilder<D> type(Class<D> type) {
+        this.type = type;
+        return (DefaultDataSourceBuilder<D>) this;
+    }
+
+    /**
+     * set DataSource name
+     *
+     * @param name DataSource name
+     * @return this instance
+     */
+    public DefaultDataSourceBuilder<T> name(String name) {
+        this.properties.put("name", name);
+        return this;
+    }
+
+    /**
+     * set database url
+     *
+     * @param url database url
+     * @return this instance
+     */
+    public DefaultDataSourceBuilder<T> url(String url) {
+        this.properties.put("url", url);
+        return this;
+    }
+
+    /**
+     * set database driver class name
+     *
+     * @param driverClassName database driver class name
+     * @return this instance
+     */
+    public DefaultDataSourceBuilder<T> driverClassName(String driverClassName) {
+        this.properties.put("driverClassName", driverClassName);
+        return this;
+    }
+
+    /**
+     * set database username
+     *
+     * @param username database username
+     * @return this instance
+     */
+    public DefaultDataSourceBuilder<T> username(String username) {
+        this.properties.put("username", username);
+        return this;
+    }
+
+    /**
+     * set database password
+     *
+     * @param password database password
+     * @return this instance
+     */
+    public DefaultDataSourceBuilder<T> password(String password) {
+        this.properties.put("password", password);
+        return this;
+    }
+
+    /**
+     * If HikariCP, Druid, Tomcat or Commons DBCP * are on the classpath one of
+     * them will be selected (in that order with Hikari * first)
+     *
+     * @param classLoader classLoader
+     * @return DataSource class
+     */
+    @SuppressWarnings("unchecked")
+    public static Class<? extends DataSource> findType(ClassLoader classLoader) {
+        for (String name : DATA_SOURCE_TYPE_NAMES) {
+            try {
+                return (Class<? extends DataSource>) ClassUtils.forName(name, classLoader);
+            } catch (Exception ex) {
+                // Swallow and continue
+            }
+        }
+        return null;
+    }
+
+    private Class<? extends DataSource> getType() {
+        Class<? extends DataSource> type = ((this.type != null) ? this.type : findType(this.classLoader));
+        if (type != null) {
+            return type;
+        }
+        throw new IllegalStateException("No supported DataSource type found");
+    }
+}

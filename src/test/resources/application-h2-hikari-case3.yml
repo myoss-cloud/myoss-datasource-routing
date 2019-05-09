@@ -1,0 +1,36 @@
+myoss-cloud:
+  datasource-routing:
+    group-data-source-load-balancer: app.myoss.cloud.datasource.routing.jdbc.loadbalancer.impl.RandomDataSourceLoadBalanced
+    databases:
+      - name: master
+        describe: 我是主数据源
+        groupName: test
+        primary: true
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: org.h2.Driver
+        url: jdbc:h2:mem:db_test_hikari_case3_master;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:scripts/h2/1-init-schema.sql'
+        username: sa
+        password: sa
+        methodPointcuts:
+          - type: JdkRegexpMethod
+            expressions:
+              # 此表达式可以匹配到 app.myoss.cloud.datasource.routing.testcase.hikari.history 这个package及所有子package下任何类的任何方法
+              - app\.myoss\.cloud\.datasource\.routing\.testcase\.hikari\.history\..*
+      - name: slave
+        describe: 我是从数据源
+        groupName: test
+        primary: false
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: org.h2.Driver
+        url: jdbc:h2:mem:db_test_hikari_case3_slave;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:scripts/h2/1-init-schema.sql'
+        username: sa
+        password: sa
+
+mybatis:
+  mapper-scanner:
+    base-package: app.myoss.cloud.datasource.routing.testcase.hikari
+    annotation-class: org.springframework.stereotype.Repository
+  configuration:
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+logging.level.app.myoss.cloud: DEBUG

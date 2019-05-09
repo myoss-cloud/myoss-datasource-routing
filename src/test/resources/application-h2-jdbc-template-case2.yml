@@ -1,0 +1,39 @@
+myoss-cloud:
+  datasource-routing:
+    databases:
+      - name: master
+        groupName: test
+        primary: true
+        driver-class-name: org.h2.Driver
+        url: jdbc:h2:mem:db_test_jdbc_template_case2_master;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:scripts/h2/1-init-schema.sql'
+        username: sa
+        password: sa
+        properties:
+          # com.zaxxer.hikari.HikariDataSource 自己的属性
+          connection-test-query: SELECT 'X' FROM DUAL
+          maximum-pool-size: 20
+          data-source-properties:
+            # 设置可以获取remarks信息
+            remarks: true
+            # 设置可以获取tables remarks信息
+            useInformationSchema: true
+      - name: slave
+        groupName: test
+        primary: false
+        driver-class-name: org.h2.Driver
+        url: jdbc:h2:mem:db_test_jdbc_template_case2_slave;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:scripts/h2/1-init-schema.sql'
+        username: sa
+        password: sa
+        properties:
+          # com.zaxxer.hikari.HikariDataSource 自己的属性
+          connection-test-query: SELECT 'X' FROM DUAL
+          maximum-pool-size: 30
+          data-source-properties:
+            # 设置可以获取remarks信息
+            remarks: true
+            # 设置可以获取tables remarks信息
+            useInformationSchema: true
+        methodPointcuts:
+          - type: AspectJExpression
+            expressions:
+              - execution(* app.myoss.cloud.datasource.routing.testcase.jdbctemplate.service.impl.*.find*(..))
