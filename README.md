@@ -6,7 +6,7 @@
 
 ## Documentation
 
-- [Documentation Home](https://github.com/myoss-cloud/myoss-datasource-routing/wiki)
+- [Documentation Home](https://cloud-docs.myoss.app/myoss-datasource-routing/readme.html)
 
 ## Download
 
