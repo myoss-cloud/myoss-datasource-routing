@@ -18,7 +18,7 @@ myoss-cloud:
         primary: true
         type: com.zaxxer.hikari.HikariDataSource
         driver-class-name: org.h2.Driver
-        url: jdbc:h2:mem:db_test_hikari_case1;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:scripts/h2/1-init-schema.sql'
+        url: jdbc:h2:mem:db_test_hikari_case5;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:scripts/h2/1-init-schema.sql'
         username: sa
         password: sa
         properties:
@@ -35,7 +35,7 @@ myoss-cloud:
         primary: false
         type: com.zaxxer.hikari.HikariDataSource
         driver-class-name: org.h2.Driver
-        url: jdbc:h2:mem:db_test_hikari_case1;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:scripts/h2/1-init-schema.sql'
+        url: jdbc:h2:mem:db_test_hikari_case5;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:scripts/h2/1-init-schema.sql'
         username: sa
         password: sa
         properties:

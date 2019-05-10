@@ -31,6 +31,7 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -178,6 +179,7 @@ public class HikariDataSourceCase5Tests {
         });
     }
 
+    @EnableAutoConfiguration
     @ComponentScan(basePackageClasses = HikariDataSourceCase5Tests.class)
     @Profile("HikariDataSourceCase5Tests")
     @Configuration

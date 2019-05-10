@@ -30,6 +30,7 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
@@ -173,6 +174,7 @@ public class DruidDataSourceCase3Tests {
         });
     }
 
+    @EnableAutoConfiguration
     @ComponentScan(basePackageClasses = DruidDataSourceCase3Tests.class)
     @Profile("DruidDataSourceCase3Tests")
     @Configuration
