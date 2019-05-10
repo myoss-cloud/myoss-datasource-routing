@@ -1,0 +1,46 @@
+myoss-cloud:
+  datasource-routing:
+    global-database-properties:
+      # com.alibaba.druid.pool.DruidDataSource 自己的属性
+      validation-query: SELECT 'X' FROM DUAL
+      max-active: 10
+    databases:
+      - name: master
+        describe: 我是主数据源
+        groupName: test
+        primary: true
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: org.h2.Driver
+        url: jdbc:h2:mem:db_test_druid_case1;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:scripts/h2/1-init-schema.sql'
+        username: sa
+        password: sa
+        properties:
+          # com.alibaba.druid.pool.DruidDataSource 自己的属性
+          max-active: 20
+      - name: slave
+        describe: 我是从数据源
+        groupName: test
+        primary: false
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: org.h2.Driver
+        url: jdbc:h2:mem:db_test_druid_case1;DB_CLOSE_DELAY=-1;INIT=RUNSCRIPT FROM 'classpath:scripts/h2/1-init-schema.sql'
+        username: sa
+        password: sa
+        properties:
+          # com.alibaba.druid.pool.DruidDataSource 自己的属性
+          max-active: 30
+        methodPointcuts:
+          - type: AspectJExpression
+            expressions:
+              # 不能匹配子类继承的方法，除非显示的重写父类的方法。所以第一个表达式，匹配不到方法
+              - execution(* app.myoss.cloud.datasource.routing.testcase.druid.service.impl.*.find*(..))
+          - type: JdkRegexpMethod
+            expressions:
+              # 此表达式可以匹配到 find* 方法
+              - app.myoss.cloud.datasource.routing.testcase.druid.service.impl.*find.*
+
+mybatis:
+  mapper-scanner:
+    base-package: app.myoss.cloud.datasource.routing.testcase.druid.mapper
+  configuration:
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl

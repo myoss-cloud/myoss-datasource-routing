@@ -65,6 +65,7 @@ public class MultiDataSourceBuilder implements DataSourceBuilder, ApplicationCon
 
     @Override
     public DataSource build() {
+        Map<String, Object> globalDatabaseProperties = dataSourceRoutingProperties.getGlobalDatabaseProperties();
         List<DataSourceProperty> databases = dataSourceRoutingProperties.getDatabases();
         Map<String, DataSource> targetDataSources = new LinkedHashMap<>();
         LinkedMultiValueMap<String, DataSource> targetGroupDataSources = new LinkedMultiValueMap<>();
@@ -90,8 +91,7 @@ public class MultiDataSourceBuilder implements DataSourceBuilder, ApplicationCon
                 }
                 result = jndiDataSourceBuilder.build(item.getJndiName());
             } else {
-                Map<String, Object> properties = (item.getProperties() != null ? item.getProperties()
-                        : new LinkedHashMap<>(8));
+                Map<String, Object> properties = mergeGlobalDatabaseProperties(globalDatabaseProperties, item);
                 DefaultDataSourceBuilder<? extends DataSource> dataSourceBuilder = DefaultDataSourceBuilder
                         .create(properties, beanClassLoader)
                         .type(item.getType())
@@ -127,6 +127,28 @@ public class MultiDataSourceBuilder implements DataSourceBuilder, ApplicationCon
         }
 
         return new MultiDataSource(primaryDataSourceName, targetDataSources);
+    }
+
+    private Map<String, Object> mergeGlobalDatabaseProperties(Map<String, Object> globalDatabaseProperties,
+                                                              DataSourceProperty item) {
+        Map<String, Object> properties = item.getProperties();
+        if (globalDatabaseProperties != null) {
+            if (properties == null) {
+                return new LinkedHashMap<>(globalDatabaseProperties);
+            }
+            for (Entry<String, Object> entry : globalDatabaseProperties.entrySet()) {
+                String key = entry.getKey();
+                // 这里只校验第一层，如果再继续校验子节点，场景会很复杂，有时候可能需要合并，有时候可能需要覆盖
+                if (!properties.containsKey(key)) {
+                    Object value = entry.getValue();
+                    properties.put(key, value);
+                }
+            }
+        }
+        if (properties == null) {
+            properties = new LinkedHashMap<>(8);
+        }
+        return properties;
     }
 
     @Override

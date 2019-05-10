@@ -18,12 +18,14 @@
 package app.myoss.cloud.datasource.routing.spring.boot.autoconfigure;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.Ordered;
 
 import app.myoss.cloud.datasource.routing.annotation.DataSource;
 import app.myoss.cloud.datasource.routing.aspectj.DataSourceAnnotationInterceptor;
+import app.myoss.cloud.datasource.routing.aspectj.DataSourceMethodPointcutInterceptor;
 import app.myoss.cloud.datasource.routing.config.DataSourceProperty;
 import app.myoss.cloud.datasource.routing.constants.DataSourceRoutingConstants;
 import app.myoss.cloud.datasource.routing.jdbc.loadbalancer.DataSourceLoadBalancer;
@@ -49,15 +51,28 @@ public class DataSourceRoutingProperties {
      *
      * @see DataSourceProperty#groupName
      */
-    private Class<? extends DataSourceLoadBalancer> groupDataSourceLoadBalancer              = RoundRobinDataSourceLoadBalanced.class;
+    private Class<? extends DataSourceLoadBalancer> groupDataSourceLoadBalancer    = RoundRobinDataSourceLoadBalanced.class;
 
     /**
      * {@link DataSource} AOP切面顺序，默认优先级最高。
+     * {@link DataSourceProperty#methodPointcuts} 自定义的AOP切面顺序 -1，优先级比
+     * {@link DataSource} AOP切面顺序 低。
      *
      * @see DataSourceAnnotationInterceptor
+     * @see DataSourceMethodPointcutInterceptor
      */
-    private Integer                                 dataSourceAnnotationPointcutAdvisorOrder = Ordered.HIGHEST_PRECEDENCE
-            + 10;
+    private Integer                                 dataSourcePointcutAdvisorOrder = Ordered.HIGHEST_PRECEDENCE + 10;
+
+    /**
+     * {@link DataSourceProperty#properties} 全局配置，设置 DataSource
+     * 特有的属性，请参考自己使用的哪种数据源。
+     *
+     * @see com.zaxxer.hikari.HikariDataSource
+     * @see com.alibaba.druid.pool.DruidDataSource
+     * @see org.apache.tomcat.jdbc.pool.DataSource
+     * @see org.apache.commons.dbcp2.BasicDataSource
+     */
+    private Map<String, Object>                     globalDatabaseProperties;
 
     /**
      * 数据源具体的属性配置

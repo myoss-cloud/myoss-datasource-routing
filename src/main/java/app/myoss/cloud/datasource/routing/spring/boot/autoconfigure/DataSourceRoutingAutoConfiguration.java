@@ -98,7 +98,7 @@ public class DataSourceRoutingAutoConfiguration {
                 .forMethodAnnotation(app.myoss.cloud.datasource.routing.annotation.DataSource.class);
         ComposablePointcut pointcut = new ComposablePointcut(classPointCut).union(methodPointcut);
         DataSourcePointcutAdvisor pointcutAdvisor = new DataSourcePointcutAdvisor(pointcut, interceptor);
-        pointcutAdvisor.setOrder(dataSourceRoutingProperties.getDataSourceAnnotationPointcutAdvisorOrder());
+        pointcutAdvisor.setOrder(dataSourceRoutingProperties.getDataSourcePointcutAdvisorOrder());
         return pointcutAdvisor;
     }
 

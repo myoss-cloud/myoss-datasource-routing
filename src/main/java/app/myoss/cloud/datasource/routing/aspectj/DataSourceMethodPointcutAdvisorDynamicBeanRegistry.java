@@ -69,7 +69,7 @@ public class DataSourceMethodPointcutAdvisorDynamicBeanRegistry implements BeanD
             return;
         }
 
-        int pointCutOrder = dataSourceRoutingProperties.getDataSourceAnnotationPointcutAdvisorOrder() - 1;
+        int pointCutOrder = dataSourceRoutingProperties.getDataSourcePointcutAdvisorOrder() - 1;
         List<DataSourcePointcutAdvisor> pointcutAdvisors = DataSourceMethodPointcutAdvisorBuilder
                 .create(allMethodPointcuts, pointCutOrder);
         for (int i = 0; i < pointcutAdvisors.size(); i++) {
