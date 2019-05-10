@@ -24,8 +24,6 @@ import javax.sql.DataSource;
 
 import org.springframework.context.annotation.Primary;
 
-import app.myoss.cloud.datasource.routing.aspectj.DataSourceMethodPointcutInterceptor;
-import app.myoss.cloud.datasource.routing.spring.boot.autoconfigure.DataSourceRoutingProperties;
 import lombok.Data;
 
 /**
@@ -49,7 +47,7 @@ public class DataSourceProperty {
     /**
      * Group name of the datasource.
      *
-     * @see DataSourceRoutingProperties#groupDataSourceLoadBalancer
+     * @see app.myoss.cloud.datasource.routing.spring.boot.autoconfigure.DataSourceRoutingProperties#groupDataSourceLoadBalancer
      */
     private String                       groupName;
 
@@ -109,7 +107,7 @@ public class DataSourceProperty {
     /**
      * The pointcut configuration of Method
      *
-     * @see DataSourceMethodPointcutInterceptor
+     * @see app.myoss.cloud.datasource.routing.aspectj.DataSourceMethodPointcutInterceptor
      */
     private List<MethodPointcutProperty> methodPointcuts;
 
