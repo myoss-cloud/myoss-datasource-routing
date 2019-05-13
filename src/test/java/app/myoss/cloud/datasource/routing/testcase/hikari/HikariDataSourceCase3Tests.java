@@ -53,9 +53,12 @@ import app.myoss.cloud.core.lang.dto.Page;
 import app.myoss.cloud.core.lang.dto.Result;
 import app.myoss.cloud.core.lang.dto.Sort;
 import app.myoss.cloud.datasource.routing.aspectj.DataSourcePointcutAdvisor;
+import app.myoss.cloud.datasource.routing.config.GroupDataSourceProperty;
 import app.myoss.cloud.datasource.routing.jdbc.GroupDataSource;
 import app.myoss.cloud.datasource.routing.jdbc.MultiDataSource;
+import app.myoss.cloud.datasource.routing.jdbc.loadbalancer.impl.RoundRobinDataSourceLoadBalanced;
 import app.myoss.cloud.datasource.routing.spring.boot.autoconfigure.DataSourceRoutingAutoConfiguration;
+import app.myoss.cloud.datasource.routing.spring.boot.autoconfigure.DataSourceRoutingProperties;
 import app.myoss.cloud.datasource.routing.testcase.hikari.HikariDataSourceCase3Tests.MyConfig;
 import app.myoss.cloud.datasource.routing.testcase.hikari.history.entity.UserHistory;
 import app.myoss.cloud.datasource.routing.testcase.hikari.history.service.UserHistoryService;
@@ -105,6 +108,8 @@ public class HikariDataSourceCase3Tests {
                 for (DataSource item : dataSources) {
                     checkDataSourceValue(item);
                 }
+                assertThat(groupDataSource).matches(source -> source.getDataSourceLoadBalancer()
+                        .getClass() == RoundRobinDataSourceLoadBalanced.class);
             } else {
                 checkDataSourceValue(value);
             }
@@ -131,6 +136,13 @@ public class HikariDataSourceCase3Tests {
         Map<String, DataSourcePointcutAdvisor> beans = applicationContext
                 .getBeansOfType(DataSourcePointcutAdvisor.class);
         assertThat(beans).hasSize(2).containsKeys("dataSourcePointcutAdvisor", "masterDataSourcePointcutAdvisor0");
+
+        DataSourceRoutingProperties routingProperties = applicationContext.getBean(DataSourceRoutingProperties.class);
+        assertThat(routingProperties).matches(properties -> {
+            GroupDataSourceProperty groupDataSourceProperty = properties.getGroupDataSourceConfig();
+            return (groupDataSourceProperty.getLoadBalancer() == RoundRobinDataSourceLoadBalanced.class
+                    && groupDataSourceProperty.getInitConfig() == null);
+        }).matches(properties -> properties.getGroupDataSourceConfigs() == null);
     }
 
     /**

@@ -47,6 +47,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import app.myoss.cloud.core.lang.dto.Result;
 import app.myoss.cloud.datasource.routing.aspectj.DataSourcePointcutAdvisor;
+import app.myoss.cloud.datasource.routing.config.GroupDataSourceProperty;
 import app.myoss.cloud.datasource.routing.jdbc.GroupDataSource;
 import app.myoss.cloud.datasource.routing.jdbc.MultiDataSource;
 import app.myoss.cloud.datasource.routing.jdbc.loadbalancer.impl.RandomDataSourceLoadBalanced;
@@ -96,6 +97,8 @@ public class HikariDataSourceCase5Tests {
                 for (DataSource item : dataSources) {
                     checkDataSourceValue(item);
                 }
+                assertThat(groupDataSource).matches(
+                        source -> source.getDataSourceLoadBalancer().getClass() == RandomDataSourceLoadBalanced.class);
             } else {
                 checkDataSourceValue(value);
             }
@@ -128,8 +131,11 @@ public class HikariDataSourceCase5Tests {
                         "slaveDataSourcePointcutAdvisor1");
 
         DataSourceRoutingProperties routingProperties = applicationContext.getBean(DataSourceRoutingProperties.class);
-        assertThat(routingProperties).matches(
-                properties -> properties.getGroupDataSourceLoadBalancer() == RandomDataSourceLoadBalanced.class);
+        assertThat(routingProperties).matches(properties -> {
+            GroupDataSourceProperty groupDataSourceProperty = properties.getGroupDataSourceConfig();
+            return (groupDataSourceProperty.getLoadBalancer() == RandomDataSourceLoadBalanced.class
+                    && groupDataSourceProperty.getInitConfig() == null);
+        }).matches(properties -> properties.getGroupDataSourceConfigs() == null);
     }
 
     @Test

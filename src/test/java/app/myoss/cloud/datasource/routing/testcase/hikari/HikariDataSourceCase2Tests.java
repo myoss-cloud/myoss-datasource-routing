@@ -43,13 +43,18 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.alibaba.fastjson.JSON;
 import com.zaxxer.hikari.HikariDataSource;
 
 import app.myoss.cloud.core.lang.dto.Result;
 import app.myoss.cloud.datasource.routing.aspectj.DataSourcePointcutAdvisor;
+import app.myoss.cloud.datasource.routing.config.GroupDataSourceProperty;
 import app.myoss.cloud.datasource.routing.jdbc.GroupDataSource;
 import app.myoss.cloud.datasource.routing.jdbc.MultiDataSource;
+import app.myoss.cloud.datasource.routing.jdbc.loadbalancer.impl.RandomDataSourceLoadBalanced;
+import app.myoss.cloud.datasource.routing.jdbc.loadbalancer.impl.RoundRobinDataSourceLoadBalanced;
 import app.myoss.cloud.datasource.routing.spring.boot.autoconfigure.DataSourceRoutingAutoConfiguration;
+import app.myoss.cloud.datasource.routing.spring.boot.autoconfigure.DataSourceRoutingProperties;
 import app.myoss.cloud.datasource.routing.testcase.hikari.HikariDataSourceCase2Tests.MyConfig;
 import app.myoss.cloud.datasource.routing.testcase.hikari.user.entity.User;
 import app.myoss.cloud.datasource.routing.testcase.hikari.user.service.UserService;
@@ -94,6 +99,8 @@ public class HikariDataSourceCase2Tests {
                 for (DataSource item : dataSources) {
                     checkDataSourceValue(item);
                 }
+                assertThat(groupDataSource).matches(source -> source.getDataSourceLoadBalancer()
+                        .getClass() == RoundRobinDataSourceLoadBalanced.class);
             } else {
                 checkDataSourceValue(value);
             }
@@ -124,6 +131,20 @@ public class HikariDataSourceCase2Tests {
         assertThat(beans).hasSize(3)
                 .containsKeys("dataSourcePointcutAdvisor", "slaveDataSourcePointcutAdvisor0",
                         "slaveDataSourcePointcutAdvisor1");
+
+        DataSourceRoutingProperties routingProperties = applicationContext.getBean(DataSourceRoutingProperties.class);
+        assertThat(routingProperties).matches(properties -> {
+            GroupDataSourceProperty groupDataSourceProperty = properties.getGroupDataSourceConfig();
+            return (groupDataSourceProperty.getLoadBalancer() == RoundRobinDataSourceLoadBalanced.class
+                    && JSON.toJSONString(groupDataSourceProperty.getInitConfig()).equals("{\"key1\":\"value1\"}"));
+        }).matches(properties -> {
+            GroupDataSourceProperty groupDataSourceProperty = properties.getGroupDataSourceConfigs().get("test");
+            return (groupDataSourceProperty == null);
+        }).matches(properties -> {
+            GroupDataSourceProperty groupDataSourceProperty = properties.getGroupDataSourceConfigs().get("test2");
+            return (groupDataSourceProperty.getLoadBalancer() == RandomDataSourceLoadBalanced.class
+                    && JSON.toJSONString(groupDataSourceProperty.getInitConfig()).equals("{\"key2\":\"value2\"}"));
+        });
     }
 
     @Test

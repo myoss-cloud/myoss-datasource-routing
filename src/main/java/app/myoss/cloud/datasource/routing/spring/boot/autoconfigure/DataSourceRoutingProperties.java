@@ -21,12 +21,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.core.Ordered;
 
 import app.myoss.cloud.datasource.routing.config.DataSourceProperty;
+import app.myoss.cloud.datasource.routing.config.GroupDataSourceProperty;
 import app.myoss.cloud.datasource.routing.constants.DataSourceRoutingConstants;
-import app.myoss.cloud.datasource.routing.jdbc.loadbalancer.DataSourceLoadBalancer;
-import app.myoss.cloud.datasource.routing.jdbc.loadbalancer.impl.RoundRobinDataSourceLoadBalanced;
 import lombok.Data;
 
 /**
@@ -41,14 +41,22 @@ public class DataSourceRoutingProperties {
     /**
      * 是否启用 "动态数据源路由" 自动配置
      */
-    private Boolean                                 enabled;
+    private Boolean                              enabled;
 
     /**
-     * 分组数据源的负载均衡器。默认值：{@link app.myoss.cloud.datasource.routing.jdbc.loadbalancer.impl.RoundRobinDataSourceLoadBalanced}
+     * 分组数据源的配置属性，这是全局的配置
      *
      * @see app.myoss.cloud.datasource.routing.config.DataSourceProperty#groupName
      */
-    private Class<? extends DataSourceLoadBalancer> groupDataSourceLoadBalancer    = RoundRobinDataSourceLoadBalanced.class;
+    @NestedConfigurationProperty
+    private GroupDataSourceProperty              groupDataSourceConfig          = new GroupDataSourceProperty();
+
+    /**
+     * 分组数据源的配置属性，为每个分组设置不同的配置
+     *
+     * @see app.myoss.cloud.datasource.routing.config.DataSourceProperty#groupName
+     */
+    private Map<String, GroupDataSourceProperty> groupDataSourceConfigs;
 
     /**
      * <ul>
@@ -63,7 +71,7 @@ public class DataSourceRoutingProperties {
      * @see app.myoss.cloud.datasource.routing.aspectj.DataSourceAnnotationInterceptor
      * @see app.myoss.cloud.datasource.routing.aspectj.DataSourceMethodPointcutInterceptor
      */
-    private Integer                                 dataSourcePointcutAdvisorOrder = Ordered.HIGHEST_PRECEDENCE + 10;
+    private Integer                              dataSourcePointcutAdvisorOrder = Ordered.HIGHEST_PRECEDENCE + 10;
 
     /**
      * {@link app.myoss.cloud.datasource.routing.config.DataSourceProperty#properties}
@@ -74,10 +82,10 @@ public class DataSourceRoutingProperties {
      * @see org.apache.tomcat.jdbc.pool.DataSource
      * @see org.apache.commons.dbcp2.BasicDataSource
      */
-    private Map<String, Object>                     globalDatabaseProperties;
+    private Map<String, Object>                  globalDatabaseProperties;
 
     /**
      * 数据源具体的属性配置
      */
-    private List<DataSourceProperty>                databases;
+    private List<DataSourceProperty>             databases;
 }

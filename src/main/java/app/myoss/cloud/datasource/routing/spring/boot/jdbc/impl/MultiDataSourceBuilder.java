@@ -31,9 +31,11 @@ import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 
 import app.myoss.cloud.datasource.routing.config.DataSourceProperty;
+import app.myoss.cloud.datasource.routing.config.GroupDataSourceProperty;
 import app.myoss.cloud.datasource.routing.constants.DataSourceRoutingConstants;
 import app.myoss.cloud.datasource.routing.jdbc.GroupDataSource;
 import app.myoss.cloud.datasource.routing.jdbc.MultiDataSource;
@@ -115,10 +117,17 @@ public class MultiDataSourceBuilder implements DataSourceBuilder, ApplicationCon
         }
 
         // create group DataSource
+        GroupDataSourceProperty groupDataSourceConfig = dataSourceRoutingProperties.getGroupDataSourceConfig();
+        Map<String, GroupDataSourceProperty> groupDataSourceConfigs = dataSourceRoutingProperties
+                .getGroupDataSourceConfigs();
         for (Entry<String, List<DataSource>> entry : targetGroupDataSources.entrySet()) {
-            DataSourceLoadBalancer dataSourceLoadBalancer = BeanUtils
-                    .instantiateClass(dataSourceRoutingProperties.getGroupDataSourceLoadBalancer());
             String groupName = entry.getKey();
+            GroupDataSourceProperty groupConfig = groupDataSourceConfig;
+            if (!CollectionUtils.isEmpty(groupDataSourceConfigs) && groupDataSourceConfigs.containsKey(groupName)) {
+                groupConfig = groupDataSourceConfigs.get(groupName);
+            }
+            DataSourceLoadBalancer dataSourceLoadBalancer = BeanUtils.instantiateClass(groupConfig.getLoadBalancer());
+            dataSourceLoadBalancer.init(groupConfig.getInitConfig());
             GroupDataSource groupDataSource = new GroupDataSource(groupName, dataSourceLoadBalancer, entry.getValue());
             DataSource previous = targetDataSources.putIfAbsent(groupName, groupDataSource);
             if (previous != null) {

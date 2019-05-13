@@ -18,6 +18,7 @@
 package app.myoss.cloud.datasource.routing.jdbc.loadbalancer;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -28,6 +29,15 @@ import javax.sql.DataSource;
  * @since 2019年5月6日 下午10:30:32
  */
 public interface DataSourceLoadBalancer {
+    /**
+     * init instance
+     *
+     * @param config special configuration
+     */
+    default void init(Map<String, Object> config) {
+        // do nothing
+    }
+
     /**
      * Retrieve the current target DataSource.
      *

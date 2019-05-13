@@ -1,6 +1,14 @@
 myoss-cloud:
   datasource-routing:
-    group-data-source-load-balancer: app.myoss.cloud.datasource.routing.jdbc.loadbalancer.impl.RandomDataSourceLoadBalanced
+    group-data-source-config:
+      load-balancer: app.myoss.cloud.datasource.routing.jdbc.loadbalancer.impl.RoundRobinDataSourceLoadBalanced
+      init-config:
+        key1: value1
+    group-data-source-configs:
+      test2:
+        load-balancer: app.myoss.cloud.datasource.routing.jdbc.loadbalancer.impl.RandomDataSourceLoadBalanced
+        init-config:
+          key2: value2
     databases:
       - name: master
         groupName: test

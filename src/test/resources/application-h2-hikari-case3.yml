@@ -1,6 +1,5 @@
 myoss-cloud:
   datasource-routing:
-    group-data-source-load-balancer: app.myoss.cloud.datasource.routing.jdbc.loadbalancer.impl.RandomDataSourceLoadBalanced
     databases:
       - name: master
         describe: 我是主数据源

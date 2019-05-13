@@ -1,6 +1,7 @@
 myoss-cloud:
   datasource-routing:
-    group-data-source-load-balancer: app.myoss.cloud.datasource.routing.jdbc.loadbalancer.impl.RandomDataSourceLoadBalanced
+    group-data-source-config:
+      load-balancer: app.myoss.cloud.datasource.routing.jdbc.loadbalancer.impl.RandomDataSourceLoadBalanced
     global-database-properties:
       # com.zaxxer.hikari.HikariDataSource 自己的属性
       connection-test-query: SELECT 'X' FROM DUAL

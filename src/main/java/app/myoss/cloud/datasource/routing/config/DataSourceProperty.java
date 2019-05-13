@@ -47,7 +47,8 @@ public class DataSourceProperty {
     /**
      * Group name of the datasource.
      *
-     * @see app.myoss.cloud.datasource.routing.spring.boot.autoconfigure.DataSourceRoutingProperties#groupDataSourceLoadBalancer
+     * @see app.myoss.cloud.datasource.routing.spring.boot.autoconfigure.DataSourceRoutingProperties#groupDataSourceConfig
+     * @see app.myoss.cloud.datasource.routing.spring.boot.autoconfigure.DataSourceRoutingProperties#groupDataSourceConfigs
      */
     private String                       groupName;
 
