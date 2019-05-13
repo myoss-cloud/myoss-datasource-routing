@@ -30,6 +30,10 @@ public class DataSourceRoutingConstants {
      * 动态数据源路由配置前缀
      */
     public static final String CONFIG_PREFIX           = MyossConstants.CONFIG_PREFIX + ".datasource-routing";
+    /**
+     * Cloud configuration needs to happen early (before database, mybatis etc.)
+     */
+    public static final int    CONFIG_ORDER            = -1000;
 
     /**
      * 主数据库名称
