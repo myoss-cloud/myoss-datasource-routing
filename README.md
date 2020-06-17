@@ -13,7 +13,7 @@
 - [maven][1]
 - [the latest JAR][2]  
 
-[1]: http://repo1.maven.org/maven2/app/myoss/cloud/jdbc/myoss-datasource-routing/  
+[1]: https://repo1.maven.org/maven2/app/myoss/cloud/jdbc/myoss-datasource-routing/  
 [2]: https://search.maven.org/remote_content?g=app.myoss.cloud.jdbc&a=myoss-datasource-routing&v=LATEST
 
 ## Maven
