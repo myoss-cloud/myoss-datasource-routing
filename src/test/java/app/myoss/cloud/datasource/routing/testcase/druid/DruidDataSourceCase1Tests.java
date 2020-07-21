@@ -42,9 +42,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.fastjson.JSON;
 
 import app.myoss.cloud.core.lang.dto.Result;
+import app.myoss.cloud.core.lang.json.JsonApi;
 import app.myoss.cloud.datasource.routing.aspectj.DataSourcePointcutAdvisor;
 import app.myoss.cloud.datasource.routing.config.GroupDataSourceProperty;
 import app.myoss.cloud.datasource.routing.jdbc.GroupDataSource;
@@ -130,11 +130,11 @@ public class DruidDataSourceCase1Tests {
         assertThat(routingProperties).matches(properties -> {
             GroupDataSourceProperty groupDataSourceProperty = properties.getGroupDataSourceConfig();
             return (groupDataSourceProperty.getLoadBalancer() == RandomDataSourceLoadBalanced.class
-                    && JSON.toJSONString(groupDataSourceProperty.getInitConfig()).equals("{\"key1\":\"value1\"}"));
+                    && JsonApi.toJson(groupDataSourceProperty.getInitConfig()).equals("{\"key1\":\"value1\"}"));
         }).matches(properties -> {
             GroupDataSourceProperty groupDataSourceProperty = properties.getGroupDataSourceConfigs().get("test");
             return (groupDataSourceProperty.getLoadBalancer() == RoundRobinDataSourceLoadBalanced.class
-                    && JSON.toJSONString(groupDataSourceProperty.getInitConfig()).equals("{\"key2\":\"value2\"}"));
+                    && JsonApi.toJson(groupDataSourceProperty.getInitConfig()).equals("{\"key2\":\"value2\"}"));
         });
     }
 
