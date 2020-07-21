@@ -22,7 +22,7 @@
 <dependency>
     <groupId>app.myoss.cloud.jdbc</groupId>
     <artifactId>myoss-datasource-routing</artifactId>
-    <version>1.0.0.RELEASE</version>
+    <version>1.0.1.RELEASE</version>
 </dependency>
 ```
 
